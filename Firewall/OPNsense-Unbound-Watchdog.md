@@ -33,7 +33,7 @@ This connects the test to the actual Unbound process and tells Monit how to star
     *   **PID File:** `/var/run/unbound.pid`
     *   **Start:** `/usr/local/sbin/pluginctl -s unbound start`
     *   **Stop:** `/usr/local/sbin/pluginctl -s unbound stop`
-    *   **Tests:** Select `unbound_process_check` (from Step 1).
+    *   **Tests:** Select `unbound_process_check` (from the previous step).
     *   **Description:** Restart Unbound DNS if process is missing.
 3.  Click **Save**.
 4.  Click **Apply** in the Monit settings page.
