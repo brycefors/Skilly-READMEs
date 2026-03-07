@@ -5,6 +5,7 @@
 *   [Redirect From Cloudflare DNS Entry to Website](DNS/Redirect-From-Cloudflare-DNS-Entry-to-Website.md) - Use Cloudflare Redirect Rules to forward a domain to another URL.
 
 ## Firewall
+*   [OPNsense Unbound Watchdog with Monit](Firewall/OPNsense-Unbound-Watchdog.md) - Configure Monit to monitor and automatically restart the Unbound DNS service.
 *   [OPNsense Upgrade Best Practices Guide](Firewall/Upgrading-OPNsense.md) - Best practices for upgrading OPNsense, covering preparation, minor/major updates, and automation.
 
 ## Games
