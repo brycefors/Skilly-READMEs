@@ -2,6 +2,7 @@
 
 ## DNS
 *   [Create Gmail Alias with Cloudflare Domain](DNS/Create-Gmail-Alias-with-Cloudflare-Domain.md) - Set up a custom email address using a Cloudflare domain and a personal Gmail account.
+*   [OPNsense-PiHole Setup Guide](DNS/PiHole-Use-OPNsense-DNS.md) - Configure Pi-hole to use OPNsense (Unbound + Dnsmasq) as it's upstream DNS server.
 *   [Redirect From Cloudflare DNS Entry to Website](DNS/Redirect-From-Cloudflare-DNS-Entry-to-Website.md) - Use Cloudflare Redirect Rules to forward a domain to another URL.
 
 ## Firewall
