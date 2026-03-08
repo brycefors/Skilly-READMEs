@@ -23,26 +23,26 @@ To configure controls:
 ### Button Mapping
 Ensure your controller is detected. The recommended mapping for an Xbox controller is:
 
-| N64 Button | Xbox Input |
-| :--- | :--- |
-| **A** (Action) | A |
-| **B** (Attack/Cancel) | X |
-| **Start** | Menu |
-| **L** (Toggle Map) | LB |
-| **R** (Shield) | RT |
-| **Z** (Target) | LT |
-| **C-Up** (Look/Fairy) | RS (Right Stick Click) |
-| **C-Left** (Item 1) | Y |
-| **C-Down** (Item 2) | RB |
-| **C-Right** (Item 3) | B |
-
+    | N64 Button | Xbox Input |
+    | :--- | :--- |
+    | **A** (Action) | A |
+    | **B** (Attack/Cancel) | X |
+    | **Start** | Menu |
+    | **L** (Toggle Map) | LB |
+    | **R** | RT |
+    | **Z** | LT |
+    | **C-Up** | RS (Right Stick Click) |
+    | **C-Down** | RB |
+    | **C-Left** | Y |
+    | **C-Right** | B |
+ 
 ### Camera & Gameplay Settings
 Navigate to the **General** tab within the controls menu to enable modern camera controls:
 
-1.  **Targeting Mode:** Set to **Hold**.
-1.  **Aiming Camera Mode:** Set to **None**.
-1.  **Analog Camera:** Set to **On** (Enables Free Look).
-1.  **Analog Camera Mode:** Set to **None**.
+1.  **Targeting Mode**: Set to **Hold**.
+1.  **Aiming Camera Mode**: Set to **None**.
+1.  **Analog Camera**: Set to **On** (Enables Free Look).
+1.  **Analog Camera Mode**: Set to **None**.
 
 Once finished, close the controls window and click **Start Game**.
 

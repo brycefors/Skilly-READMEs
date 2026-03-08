@@ -46,16 +46,16 @@ Configure Gmail to send mail as your custom domain.
 2.  Click the **Accounts and Import** tab.
 3.  Under **Send mail as**, click **Add another email address**.
 4.  **Configure the Alias:**
-    *   **Name:** Enter the name you want recipients to see.
-    *   **Email address:** Enter your custom domain email (e.g., `hello@yourdomain.com`).
-    *   **Treat as an alias:** Checked (usually recommended).
+    *   **Name**: Enter the name you want recipients to see.
+    *   **Email address**: Enter your custom domain email (e.g., `hello@yourdomain.com`).
+    *   **Treat as an alias**: Checked (usually recommended).
     *   Click **Next Step**.
 5.  **SMTP Settings:**
-    *   **SMTP Server:** `smtp.gmail.com`
-    *   **Port:** `587`
-    *   **Username:** Your *original* Gmail address (e.g., `user@gmail.com`).
-    *   **Password:** The **App Password** you generated in Section 2.
-    *   **Connection:** Secured connection using **TLS**.
+    *   **SMTP Server**: `smtp.gmail.com`
+    *   **Port**: `587`
+    *   **Username**: Your *original* Gmail address (e.g., `user@gmail.com`).
+    *   **Password**: The **App Password** you generated in Section 2.
+    *   **Connection**: Secured connection using **TLS**.
     *   Click **Add Account**.
 6.  **Verify:**
     *   Gmail will send a confirmation code to your custom email address.
@@ -71,7 +71,7 @@ This setup uses Gmail's SMTP servers to send mail. While convenient and free, it
 *   **Recommendation:** For critical business email, consider a paid service (like Google Workspace). Alternatively, you can use an **SMTP Relay** (like Brevo, SMTP2GO, or SendGrid). By configuring Gmail to send through the relay's SMTP server instead of Google's, you can set up custom DKIM records for your domain, ensuring proper alignment and better deliverability.
 
 **This step is optional.** If you are satisfied with the basic setup, you can stop here.
-
+ 
 However, setting up an SMTP relay is the superior technical path because it allows you to sign outgoing mail with a DKIM key specific to your custom domain, rather than relying on Gmail's generic signature. This ensures "Alignment," which is critical for passing strict DMARC policies.
 
 Here is the technical blueprint for setting this up using a common provider like Brevo (formerly Sendinblue) or SMTP2GO.
@@ -89,16 +89,16 @@ To "authorize" the relay to send mail on your behalf, you must add the generated
 *   **Add DKIM:** Copy the records from your provider. In Cloudflare, go to **DNS** > **Records** and add them as TXT or CNAME records. Ensure the proxy status (orange cloud) is **Off (DNS Only)**.
 *   **Merge SPF:** You likely already have an SPF record for Cloudflare Email Routing. You must merge the relay's SPF into your existing one.
     *   *Cloudflare Only:* `v=spf1 include:_spf.mx.cloudflare.net ~all`
-    *   *Cloudflare + SMTP Relay (e.g., Brevo):* `v=spf1 include:_spf.mx.cloudflare.net include:spf.brevo.com mx ~all`
+    *   *Cloudflare + SMTP Relay (e.g., Brevo)*: `v=spf1 include:_spf.mx.cloudflare.net include:spf.brevo.com mx ~all`
     > **Note:** Never have two separate SPF records. They must be combined into a single string.
 
 ### 3. Connect Gmail to the Relay
 Now, configure Gmail to use the relay's "pipes" instead of its own.
 
 *   **Get SMTP Credentials:** In your relay dashboard, find the SMTP Settings. You will need:
-    *   **SMTP Server:** (e.g., `smtp-relay.brevo.com` or `mail.smtp2go.com`)
-    *   **Port:** `587` (TLS)
-    *   **Username/Password:** Provided by the relay.
+    *   **SMTP Server**: (e.g., `smtp-relay.brevo.com` or `mail.smtp2go.com`)
+    *   **Port**: `587` (TLS)
+    *   **Username/Password**: Provided by the relay.
 *   **Gmail Configuration:**
     *   Go to **Gmail Settings** > **Accounts and Import** > **Send mail as**.
     *   Add your custom email (or edit the existing alias).

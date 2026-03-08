@@ -9,24 +9,24 @@ Regardless of the version type, always perform these steps before clicking "Upda
 ### A. Backup Configuration
 This is the most critical step. If the filesystem corrupts, you can restore a fresh install in minutes if you have this file.
 *   **Navigate to:** `System` > `Configuration` > `Backups`.
-*   **Action:** Download the `config.xml`.
-*   **Tip:** If saving to a cloud drive or email, check "Encrypt this configuration file" to protect passwords and keys.
+*   **Action**: Download the `config.xml`.
+*   **Tip**: If saving to a cloud drive or email, check "Encrypt this configuration file" to protect passwords and keys.
 
 ### B. Virtual Machine Snapshots
 If your OPNsense is virtualized (Proxmox, ESXi, Hyper-V):
-*   **Action:** Take a full VM snapshot before starting.
-*   **Benefit:** This allows for an instant rollback if the update fails, far faster than reinstalling.
+*   **Action**: Take a full VM snapshot before starting.
+*   **Benefit**: This allows for an instant rollback if the update fails, far faster than reinstalling.
 
 ### C. Verify Console Access
 Updates can occasionally break the WebGUI or SSH service.
-*   **Action:** Ensure you have access to the physical VGA/HDMI monitor, Serial Console, or IPMI/iDRAC.
-*   **Why:** You may need to assign interfaces or restore a previous configuration from the console menu if the network stack fails.
+*   **Action**: Ensure you have access to the physical VGA/HDMI monitor, Serial Console, or IPMI/iDRAC.
+*   **Why**: You may need to assign interfaces or restore a previous configuration from the console menu if the network stack fails.
 
 ### D. Check Disk Space
-*   **Action:** Ensure you have sufficient disk space (at least 2-3 GB free) for downloading packages and extracting the base system.
+*   **Action**: Ensure you have sufficient disk space (at least 2-3 GB free) for downloading packages and extracting the base system.
 
 ---
-
+ 
 ## 2. Minor Version Upgrades
 **Example:** `26.1.1` to `26.1.2`
 **Frequency:** Every 1-3 weeks.
@@ -41,7 +41,7 @@ Minor updates typically contain security patches, bug fixes, and minor feature a
     *   The update screen will indicate if a reboot is required (usually for Kernel or Base system updates).
     *   If no reboot is required, services will simply restart. Be aware this drops active connections briefly.
 4.  **Audit Services:** After the update, check the Dashboard to ensure services like Unbound DNS, Intrusion Detection, and VPNs are running (green play icon).
-
+ 
 ---
 
 ## 3. Major Version Upgrades
@@ -68,9 +68,9 @@ Major updates often upgrade the underlying FreeBSD operating system, PHP version
     *   **Action:** Uninstall these plugins before the upgrade. You can reinstall them after the system is successfully running the new version.
 
 ---
-
+ 
 ## 4. Automated Updates
-
+ 
 For users preferring a "set and forget" approach for security patches, OPNsense can update itself automatically.
 
 ### Configuration

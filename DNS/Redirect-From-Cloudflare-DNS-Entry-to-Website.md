@@ -12,10 +12,10 @@ For any Cloudflare rule to work, traffic must actually pass through Cloudflare's
 3.  **Create a new record:**
     *   **Type:** `A`
     *   **Name:** `@` (represents your root domain)
-    *   **IPv4 address:** `192.0.2.1` (This is a standard "dummy" IP used for redirects; it doesn't need to be a real server).
-    *   **Proxy status:** Proxied (Orange cloud icon).
+    *   **IPv4 address**: `192.0.2.1` (This is a standard "dummy" IP used for redirects; it doesn't need to be a real server).
+    *   **Proxy status**: Proxied (Orange cloud icon).
 4.  (Optional) Repeat for a CNAME or A record named `www` if you want `www.yourdomain.com` to also redirect.
-
+ 
 ## Step 2: Create the Redirect Rule
 Now that traffic is flowing through the proxy, you can tell Cloudflare where to send it.
 
@@ -24,13 +24,13 @@ Now that traffic is flowing through the proxy, you can tell Cloudflare where to 
 3.  **Rule name:** Give it a name like "Redirect to Destination".
 4.  **If incoming requests match...:**
     *   Select **Custom filter expression**.
-    *   **Field:** `Hostname`
-    *   **Operator:** `equals`
-    *   **Value:** `yourdomain.com`
+    *   **Field**: `Hostname`
+    *   **Operator**: `equals`
+    *   **Value**: `yourdomain.com`
     *   *Note: If you want to include `www`, change the operator to "is in" and add both hostnames.*
 5.  **Then...:**
-    *   **Type:** `Static`
-    *   **URL:** `https://destination-url.com`
-    *   **Status code:** `301` (Permanent redirect — best for SEO and browser caching).
-    *   **Preserve query string:** Usually, you can leave this off unless you want to pass parameters to the destination.
+    *   **Type**: `Static`
+    *   **URL**: `https://destination-url.com`
+    *   **Status code**: `301` (Permanent redirect — best for SEO and browser caching).
+    *   **Preserve query string**: Usually, you can leave this off unless you want to pass parameters to the destination.
 6.  Click **Deploy**.

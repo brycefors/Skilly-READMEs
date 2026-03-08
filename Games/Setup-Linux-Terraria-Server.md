@@ -40,15 +40,15 @@ Create the server configuration file.
 `sudo nano /terraria/serverconfig.txt`
 
 Paste the following configuration (adjust paths and settings as needed):
-
+ 
 ```ini
 # Path to the world file
 world=~/.local/share/Terraria/Worlds/Worldy_McWorld.wld
-# Auto-create world size if missing: 1=Small, 2=Medium, 3=Large
+# Auto-create world size if missing: 1=Small, 2=Medium, 3=Large 
 autocreate=3
 # Name of the world to generate
 worldname=Worldy McWorld
-# Difficulty: 0=Classic, 1=Expert, 2=Master, 3=Journey
+# Difficulty: 0=Classic, 1=Expert, 2=Master, 3=Journey 
 difficulty=2
 # Max players allowed
 maxplayers=8
@@ -56,7 +56,7 @@ maxplayers=8
 port=7777
 # Message of the Day shown on join
 motd=You guys are great!
-# Universal Plug and Play (0=Off, 1=On) - Best left off for dedicated servers
+# Universal Plug and Play (0=Off, 1=On) - Best left off for dedicated servers 
 upnp=0
 ```
 

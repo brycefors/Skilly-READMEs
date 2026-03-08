@@ -10,7 +10,7 @@ This isn't a "best practices" guide for enterprise production, it's just how I g
 **The Downside:** If you actually rely on IPv6 (or if your ISP uses CGNAT and requires IPv6 for direct access), this will break your connectivity.
 
 Add the following to `/etc/sysctl.conf`:
-```properties
+```ini
 net.ipv6.conf.all.disable_ipv6=1
 net.ipv6.conf.default.disable_ipv6=1
 net.ipv6.conf.lo.disable_ipv6=1
@@ -40,8 +40,8 @@ apt install curl unattended-upgrades -y
 Edit `/etc/apt/apt.conf.d/50unattended-upgrades` and ensure the following settings are active:
 
 ```text
-"origin=Debian,codename=${distro_codename}-updates";
-Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";
+"origin=Debian,codename=${distro_codename}-updates"; # Keep this line as is
+Unattended-Upgrade::Remove-Unused-Kernel-Packages "true"; 
 Unattended-Upgrade::Remove-New-Unused-Dependencies "true";
 Unattended-Upgrade::Remove-Unused-Dependencies "true";
 Unattended-Upgrade::Automatic-Reboot "true";
@@ -56,7 +56,7 @@ Unattended-Upgrade::Automatic-Reboot-Time "05:00";
 *   **Security Risk:** Running scripts directly from the internet is inherently risky. If the source is compromised, malicious code runs on your system.
 *   **No Version Control:** This installs the absolute latest version. Production environments usually prefer pinning specific versions to avoid breaking changes.
 *   **"Black Box":** You are trusting the script to handle GPG keys and repositories correctly without manual verification.
-*   **Root Privileges:** By default, the Docker daemon runs as `root`. This means a container breakout could grant full system access. For stricter security, consider using "Rootless Docker" instead.
+*   **Root Privileges**: By default, the Docker daemon runs as `root`. This means a container breakout could grant full system access. For stricter security, consider using "Rootless Docker" instead.
 
 ```bash
 curl -fsSL https://get.docker.com -o get-docker.sh

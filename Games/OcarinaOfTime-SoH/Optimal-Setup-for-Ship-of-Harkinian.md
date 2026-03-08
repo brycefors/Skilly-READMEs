@@ -25,7 +25,7 @@ This guide details the optimal setup process, from installation to configuration
 Ship of Harkinian supports most controllers (Xbox, PlayStation, Switch) out of the box. If you do not have a dual analog controller, skip these steps.
 
 The configuration below binds the buttons to mimic the physical layout of **Ocarina of Time on the GameCube**. Specifically, mapping **N64 B** to **Xbox X** replicates the angle of the GameCube's B button relative to A. It also moves C-buttons to the remaining face buttons to free up the Right Stick for modern camera control.
-
+ 
 To configure and remap buttons:
 
 1. Press **Esc** to open the on-screen menu bar.
@@ -45,24 +45,24 @@ To configure and remap buttons:
     | **C-Down** | RB |
     | **C-Left** | Y |
     | **C-Right** | B |
-
+ 
 1. **Additional Control Settings:** Scroll down in the Controls window to configure the following:
-    *   **Ocarina Controls:** Enable **Dpad Ocarina Playback**.
-    *   **Camera Controls:** Enable **Right Stick Aiming**.
-    *   **Third-Person Camera:** Enable **Free Look** (allows right-stick camera control).
-    *   **Inversion:** (Optional) Disable **Invert Aiming Y Axis** and **Invert Z-Weapon Aiming Y Axis**.
+    *   **Ocarina Controls**: Enable **Dpad Ocarina Playback**.
+    *   **Camera Controls**: Enable **Right Stick Aiming**.
+    *   **Third-Person Camera**: Enable **Free Look** (allows right-stick camera control).
+    *   **Inversion**: (Optional) Disable **Invert Aiming Y Axis** and **Invert Z-Weapon Aiming Y Axis**.
 1. **Ready to Play:** Press **Esc** to close the menu and start the game. If you wish to apply further enhancements, proceed to the next section.
-
+ 
 # Optimal Graphics
 To achieve the best visual experience in Ocarina of Time, configure the following settings:
 
 1. Press **Esc** to open the menu, then navigate to **Settings** > **Graphics**.
 1. **High Frame Rate:** Check **Match Refresh Rate**. This unlocks the frame rate from the original 20 FPS to match your monitor's refresh rate.
 1. Navigate to the **Enhancements** tab at the top, then select **Graphics**.
-1. **Models & Textures:** Enable the following options to improve asset quality:
+1. **Models & Textures**: Enable the following options to improve asset quality:
     *   **Disable LOD** (Level of Detail)
     *   **Enable 3D Dropped Items/Projectiles**
-    *   **Animated Link in Pause Menu**
+    *   **Animated Link in Pause Menu** 
     *   **Show Gauntlets in First-Person**
 1. **Draw Distance:** Increase **Actor Draw Distance** to **5x** (Max) and enable **Widescreen Actor Culling**.
 1. **Fix Vanishing Paths:** To prevent textures from disappearing at certain camera angles:
@@ -74,27 +74,27 @@ While Ship of Harkinian offers extensive QoL options, some can alter the game's 
 
 1. Press **Esc** to open the menu.
 1. Navigate to **Enhancements** > **Quality of Life**.
-    *   **Saving:** Enable **Remember Save Location**.
-    *   **Item Count Messages:** Enable **Gold Skulltula Tokens**, **Pieces of Heart**, and **Heart Containers**.
-    *   **Misc:** Enable **Better Owl**.
-    *   **Convenience:** Enable **Instant Putaway**.
+    *   **Saving**: Enable **Remember Save Location**.
+    *   **Item Count Messages**: Enable **Gold Skulltula Tokens**, **Pieces of Heart**, and **Heart Containers**.
+    *   **Misc**: Enable **Better Owl**.
+    *   **Convenience**: Enable **Instant Putaway**.
 1. Navigate to **Enhancements** > **Skips & Speed-ups**.
     *   Enable **Skip Text**, **Empty Bottles Faster** and **Faster Pause Menu**.
     *   Set **Vine/Ladder Climb** to **+1**, **Block Pushing Speed** to **+2**, and **Crawl Speed** to **2x**.
 1. Navigate to **Enhancements** > **Items**.
-    *   **Equipment:** Enable **Equip Items on Dpad**, **Assignable Tunics and Boots**, and **Ask to Equip New Items**.
-    *   **Ocarina:** Enable **Prevent Dropped Ocarina Inputs** and **Fast Ocarina Playback**.
-    *   **Masks:** Set **Bunny Hood Effect** to **Faster + Longer Jump**. Enable **Mask Equippable as Adult** and **Persistent Masks**.
-    *   **Bow / Slingshot:** Enable **Equip Multiple Arrows at Once**, **Skip Magic Arrow Equip Animation**, and **Aiming Reticle**.
-    *   **Hookshot:** Enable **Targetable Hookshot Reticle**.
-    *   **Magic Spells:** Enable **Better Farore's Wind** and **Faster Farore's Wind**.
-    *   **Bottles:** Enable **Rebottle Blue Fire**.
+    *   **Equipment**: Enable **Equip Items on Dpad**, **Assignable Tunics and Boots**, and **Ask to Equip New Items**.
+    *   **Ocarina**: Enable **Prevent Dropped Ocarina Inputs** and **Fast Ocarina Playback**.
+    *   **Masks**: Set **Bunny Hood Effect** to **Faster + Longer Jump**. Enable **Mask Equippable as Adult** and **Persistent Masks**.
+    *   **Bow / Slingshot**: Enable **Equip Multiple Arrows at Once**, **Skip Magic Arrow Equip Animation**, and **Aiming Reticle**.
+    *   **Hookshot**: Enable **Targetable Hookshot Reticle**.
+    *   **Magic Spells**: Enable **Better Farore's Wind** and **Faster Farore's Wind**.
+    *   **Bottles**: Enable **Rebottle Blue Fire**.
 1. Navigate to **Enhancements** > **Fixes**.
-    *   **Camera Fixes:** Enable **Fix Camera Drift**, **Fix Camera Swing**, and **Fix Hanging Ledge Swing Rate**.
-
+    *   **Camera Fixes**: Enable **Fix Camera Drift**, **Fix Camera Swing**, and **Fix Hanging Ledge Swing Rate**.
+ 
 # Texture Packs
 This section covers recommended texture pack mods to enhance the visual fidelity of Ocarina of Time. Select one or the other depending on your preference as having both could cause graphical glitches.
-
+ 
 
 ### OoT Reloaded
 **OoT Reloaded** is a comprehensive high-definition texture pack created by GhostlyDark. It aims to modernize the game's visuals while remaining faithful to the original N64 aesthetic.
@@ -117,14 +117,14 @@ To replicate the visual style of *Ocarina of Time 3D*, follow these steps to ins
     *   Extract the `.otr` files from the downloaded ZIP archives.
     *   Move them into the `mods` folder within your Ship of Harkinian directory.
     *   Delete the following files from the `mods` folder: 
-        *  `Djipi's 3DE - 02 Link's Textures (Delete if using a custom player model).otr`
+        *   `Djipi's 3DE - 02 Link's Textures (Delete if using a custom player model).otr`
 1.  **Restart:** Restart Ship of Harkinian to apply the new textures.
 1.  **Grotto and 2D Pre-Rendered Fix:** Press **Esc**, navigate to **Enhancements**, and enable **Disable Grotto Fixed Rotation** and **Disable 2D Pre-Rendered Scenes**.
-
+ 
 **Troubleshooting Visual Glitches:**
 If you encounter graphical issues with the 3DS setup, follow these steps to ensure correct texture layering:
 
-1.  **Update Texture Pack:** Download [djipi_s_3ds_experience_christmas_2024.zip](https://gamebanana.com/mods/download/477979) and extract it over your existing files.
+1.  **Update Texture Pack**: Download djipi_s_3ds_experience_christmas_2024.zip and extract it over your existing files.
 1.  **Install Base Textures:** Download **OoT Reloaded** (as described in the previous section) and place it in the `mods` folder.
 1.  **Verify Mod Load Order:** Launch SoH, open the menu, and navigate to the **Modding** menu. Ensure the load order matches the list below (from top to bottom):
     *   `M3DS*_Textures.otr`
