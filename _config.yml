@@ -1,5 +1,5 @@
 theme: minima
 minima:
-	skin: dark
+  skin: dark
 title: Skilly READMEs
 description: Guides and notes for homelab, troubleshooting, and setup workflows.
