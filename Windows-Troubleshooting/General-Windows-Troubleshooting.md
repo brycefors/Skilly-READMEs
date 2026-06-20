@@ -1,6 +1,6 @@
 # General Windows Troubleshooting
 
-> If remote support is required, start with **Windows Quick Assist** on the affected PC.
+> If remote support is required, start with **Windows Quick Assist** on the affected PC. Note that Quick Assist does not handle UAC prompts well - the helper cannot interact with elevation dialogs, which blocks many admin tasks. If UAC access is needed, use **TeamViewer** (https://www.teamviewer.com) instead, as it supports full elevation handling during a session.
 > For unattended future troubleshooting, consider **Chrome Remote Desktop** configured on the target machine.
 
 ## Before You Start
@@ -38,12 +38,13 @@ The biggest mistake is changing too many things too fast. Make one change, test,
 3. Disable all browser extensions, then test the problem page again.
 4. Re-enable extensions one at a time until the issue returns.
 5. Remove unknown, unused, or recently added extensions.
-6. Keep only trusted security/privacy tools, such as:
+6. Check and clean up browser notification permissions: open browser **Settings > Privacy and security > Notifications** (or Site Settings), revoke any site you don't recognize, and block new requests by default.
+7. Keep only trusted security/privacy tools, such as:
 	- **uBlock Origin** (blocks malicious ad networks and scam redirects)
 	- **Bitwarden** (uses unique passwords and reduces credential reuse)
 	- **Malwarebytes Browser Guard** (adds phishing and scam page blocking)
 
-> **Why this matters:** Browser cache corruption and bad extensions can mimic malware, break logins, and cause random page failures. Testing with extensions off isolates browser-side problems quickly.
+> **Why this matters:** Browser cache corruption and bad extensions can mimic malware, break logins, and cause random page failures. Rogue notification permissions are a common scam vector - fake virus alerts and phishing popups are frequently pushed this way. Testing with extensions off isolates browser-side problems quickly.
 
 ## 5. If someone thinks they have malware, treat it seriously (20-60+ minutes)
 1. Disconnect from Wi-Fi or unplug Ethernet right away.
@@ -61,10 +62,11 @@ The biggest mistake is changing too many things too fast. Make one change, test,
 2. Run **Autoruns.exe** as Administrator.
 3. Go to **Options** and enable **Hide Microsoft Entries**.
 4. Check **Logon**, **Services**, and **Scheduled Tasks**.
-5. If something looks suspicious, right-click and use **Search Online**.
-6. Uncheck entries first (disable), reboot, and test.
+5. Watch specifically for remote access tools that may have been installed without the user's knowledge — common ones include **ScreenConnect**, **AnyDesk**, **UltraViewer**, **TeamViewer**, and **AeroAdmin**. Legitimate installs are fine; unknown ones are a red flag.
+6. If something looks suspicious, right-click and use **Search Online**.
+7. Uncheck entries first (disable), reboot, and test.
 
-> **Why this matters:** Disable first, delete later. Reversible changes are safer when helping non-technical users.
+> **Why this matters:** Disable first, delete later. Reversible changes are safer when helping non-technical users. Remote access tools left running in the background are a classic technique used in tech support scams to regain access to a machine.
 
 ## 7. Speed up a slow PC safely (10-20 minutes)
 1. Open **Task Manager > Startup apps**.
