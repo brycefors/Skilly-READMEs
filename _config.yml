@@ -1,5 +1,3 @@
-theme: minima
-minima:
-  skin: dark
+remote_theme: cotes2020/jekyll-theme-chirpy
 title: Skilly READMEs
 description: Guides and notes for homelab, troubleshooting, and setup workflows.
