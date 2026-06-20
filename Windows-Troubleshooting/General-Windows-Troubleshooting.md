@@ -31,7 +31,20 @@ The biggest mistake is changing too many things too fast. Make one change, test,
 
 > **Why this matters:** Exact wording and timing save hours. "It crashed" is too vague to troubleshoot well.
 
-## 4. If someone thinks they have malware, treat it seriously (20-60+ minutes)
+## 4. Check browser issues first: cache and extensions (5-15 minutes)
+1. Reproduce the issue in a private/incognito window.
+2. Clear cached images/files and cookies in the affected browser.
+3. Disable all browser extensions, then test the problem page again.
+4. Re-enable extensions one at a time until the issue returns.
+5. Remove unknown, unused, or recently added extensions.
+6. Keep only trusted security/privacy tools, such as:
+	- **uBlock Origin** (blocks malicious ad networks and scam redirects)
+	- **Bitwarden** (uses unique passwords and reduces credential reuse)
+	- **Malwarebytes Browser Guard** (adds phishing and scam page blocking)
+
+> **Why this matters:** Browser cache corruption and bad extensions can mimic malware, break logins, and cause random page failures. Testing with extensions off isolates browser-side problems quickly.
+
+## 5. If someone thinks they have malware, treat it seriously (20-60+ minutes)
 1. Disconnect from Wi-Fi or unplug Ethernet right away.
 2. Run a full scan in **Windows Security > Virus & threat protection**.
 3. Quarantine or remove anything found, then reboot.
@@ -40,7 +53,7 @@ The biggest mistake is changing too many things too fast. Make one change, test,
 
 > **Why this matters:** One clean scan is not always enough. Some threats only show up on a second tool or after reboot.
 
-## 5. Check startup junk (and suspicious entries) with Autoruns (10-30 minutes)
+## 6. Check startup junk (and suspicious entries) with Autoruns (10-30 minutes)
 1. Download Autoruns from Microsoft Sysinternals: https://learn.microsoft.com/sysinternals/downloads/autoruns.
 2. Run **Autoruns.exe** as Administrator.
 3. Go to **Options** and enable **Hide Microsoft Entries**.
@@ -50,7 +63,7 @@ The biggest mistake is changing too many things too fast. Make one change, test,
 
 > **Why this matters:** Disable first, delete later. Reversible changes are safer when helping non-technical users.
 
-## 6. Speed up a slow PC safely (10-20 minutes)
+## 7. Speed up a slow PC safely (10-20 minutes)
 1. Open **Task Manager > Startup apps**.
 2. Disable high-impact apps that are clearly optional (game launchers, chat apps, RGB tools, vendor tray apps).
 3. Keep antivirus, backup, and hardware driver software enabled unless you are sure.
@@ -58,7 +71,7 @@ The biggest mistake is changing too many things too fast. Make one change, test,
 
 > **Why this matters:** Startup overload is one of the most common reasons home PCs feel slow.
 
-## 7. Free space and clean clutter (15-45 minutes)
+## 8. Free space and clean clutter (15-45 minutes)
 1. Run Disk Cleanup: press **Win + R**, run `cleanmgr`, choose the system drive, and clean temporary files.
 2. Turn on **Storage Sense** in **Settings > System > Storage**.
 3. Use **WizTree** (https://diskanalyzer.com/) to find giant folders fast.
@@ -68,7 +81,7 @@ The biggest mistake is changing too many things too fast. Make one change, test,
 
 > **Why this matters:** Low disk space causes updates, caching, and apps to fail in unpredictable ways.
 
-## 8. Last resort: repair install or clean reinstall Windows 11 (45-120+ minutes)
+## 9. Last resort: repair install or clean reinstall Windows 11 (45-120+ minutes)
 1. Back up important files first.
 2. Download Microsoft's installer tools: https://www.microsoft.com/software-download/windows11.
 3. Choose **Keep personal files and apps** for a repair install.
@@ -77,7 +90,7 @@ The biggest mistake is changing too many things too fast. Make one change, test,
 
 > **Why this matters:** Reinstalling works, but it is time-consuming. Try the earlier sections first.
 
-## 9. Wrap-up checklist
+## 10. Wrap-up checklist
 1. Confirm the original issue is fixed.
 2. Re-enable internet if malware checks are complete and clean.
 3. Tell the person what changed in plain language.
