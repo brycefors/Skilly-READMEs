@@ -11,6 +11,7 @@ The biggest mistake is changing too many things too fast. Make one change, test,
 2. Check for updates in **Settings > Windows Update > Check for updates**.
 3. Confirm basics: power cable, battery level, Wi-Fi or Ethernet, and monitor connection.
 4. Open **Task Manager** and sort by CPU, Memory, and Disk to spot anything maxing out resources.
+5. If Task Manager is not enough, run **Process Explorer** (Sysinternals) to inspect parent/child process trees, command lines, and loaded modules: https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer.
 
 > **Why this matters:** A lot of "serious" issues are just a stuck process, pending update, or simple connection problem.
 
@@ -48,8 +49,10 @@ The biggest mistake is changing too many things too fast. Make one change, test,
 1. Disconnect from Wi-Fi or unplug Ethernet right away.
 2. Run a full scan in **Windows Security > Virus & threat protection**.
 3. Quarantine or remove anything found, then reboot.
-4. Run a second-opinion scan with **Malwarebytes** (https://www.malwarebytes.com/mwb-download) or **ESET Online Scanner** (https://www.eset.com/us/home/online-scanner/).
-5. Keep the PC offline until scans come back clean.
+4. Download **Process Explorer** from Sysinternals if it is not already installed: https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer.
+5. In **Process Explorer**, turn on VirusTotal lookups: go to **Options > VirusTotal.com > Check VirusTotal.com**, accept the prompt, then review the **VirusTotal** column (for example, `0/76` is usually clean; higher detections need investigation).
+6. Run a second-opinion scan with **Malwarebytes** (https://www.malwarebytes.com/mwb-download) or **ESET Online Scanner** (https://www.eset.com/us/home/online-scanner/).
+7. Keep the PC offline until scans come back clean.
 
 > **Why this matters:** One clean scan is not always enough. Some threats only show up on a second tool or after reboot.
 
