@@ -16,3 +16,6 @@
 
 ## Linux
 *   [My Linux Post-Install Routine](Linux/Linux-Post-Install-Steps.md) - Personal configuration steps for Debian/Ubuntu servers focusing on low maintenance.
+
+## Windows Troubleshooting
+*   [General Windows Troubleshooting](Windows-Troubleshooting/General-Windows-Troubleshooting.md) - End-to-end Windows triage flow including malware checks, Autoruns startup analysis, disk cleanup, app maintenance, and reinstall guidance.
