@@ -22,7 +22,7 @@ The biggest mistake is changing too many things too fast. Make one change, test,
 4. Restart the PC.
 5. If the issue is still there, run both commands one more time.
 
-> **Why this matters:** DISM repairs the Windows image; SFC repairs protected system files. Together they fix many random crashes and weird OS behavior.
+> **Why this matters:** DISM repairs the Windows image. SFC repairs protected system files. Together they fix many random crashes and weird OS behavior.
 
 ## 3. Nail down the exact symptom before guessing (5-15 minutes)
 1. Ask what happened right before the issue started (new app, update, game install, driver change).
@@ -51,7 +51,7 @@ The biggest mistake is changing too many things too fast. Make one change, test,
 2. Run a full scan in **Windows Security > Virus & threat protection**.
 3. Quarantine or remove anything found, then reboot.
 4. Download **Process Explorer** from Sysinternals if it is not already installed: https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer.
-5. In **Process Explorer**, turn on VirusTotal lookups: go to **Options > VirusTotal.com > Check VirusTotal.com**, accept the prompt, then review the **VirusTotal** column (for example, `0/76` is usually clean; higher detections need investigation).
+5. In **Process Explorer**, turn on VirusTotal lookups: go to **Options > VirusTotal.com > Check VirusTotal.com**, accept the prompt, then review the **VirusTotal** column (for example, `0/76` is usually clean. Higher detections need investigation).
 6. Run a second-opinion scan with **Malwarebytes** (https://www.malwarebytes.com/mwb-download) or **ESET Online Scanner** (https://www.eset.com/us/home/online-scanner/).
 7. Keep the PC offline until scans come back clean.
 
@@ -62,7 +62,7 @@ The biggest mistake is changing too many things too fast. Make one change, test,
 2. Run **Autoruns.exe** as Administrator.
 3. Go to **Options** and enable **Hide Microsoft Entries**.
 4. Check **Logon**, **Services**, and **Scheduled Tasks**.
-5. Watch specifically for remote access tools that may have been installed without the user's knowledge — common ones include **ScreenConnect**, **AnyDesk**, **UltraViewer**, **TeamViewer**, and **AeroAdmin**. Legitimate installs are fine; unknown ones are a red flag.
+5. Watch specifically for remote access tools that may have been installed without the user's knowledge. Common ones include **ScreenConnect**, **AnyDesk**, **UltraViewer**, **TeamViewer**, and **AeroAdmin**. Legitimate installs are fine. Unknown ones are a red flag.
 6. If something looks suspicious, right-click and use **Search Online**.
 7. Uncheck entries first (disable), reboot, and test.
 
