@@ -1,5 +1,12 @@
 **Skilly READMEs** is a repository of random guides and documentation. It can be on how to configure a server, mom's roll recipe or how to remove foot odor.
 
+## Table of Contents
+* [DNS](#dns)
+* [Firewall](#firewall)
+* [Games](#games)
+* [Linux](#linux)
+* [Windows Troubleshooting](#windows-troubleshooting)
+
 ## DNS
 *   [Create Gmail Alias with Cloudflare Domain](DNS/Create-Gmail-Alias-with-Cloudflare-Domain.md) - Set up a custom email address using a Cloudflare domain and a personal Gmail account.
 *   [OPNsense-PiHole Setup Guide](DNS/PiHole-Use-OPNsense-DNS.md) - Configure Pi-hole to use OPNsense (Unbound + Dnsmasq) as it's upstream DNS server.
