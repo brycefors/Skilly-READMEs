@@ -86,7 +86,22 @@ The biggest mistake is changing too many things too fast. Make one change, test,
 
 > **Why this matters:** Low disk space causes updates, caching, and apps to fail in unpredictable ways.
 
-## 9. Last resort: repair install or clean reinstall Windows 11 (45-120+ minutes)
+## 9. Long-term maintenance plan (10-30 minutes per week)
+1. Install or update **Microsoft PC Manager** from the Microsoft Store and keep it on the latest version.
+2. Open **PC Manager > Settings** and enable **Start Microsoft PC Manager automatically when I sign in to Windows**.
+3. Once per week, open **PC Manager > Health Check** and remove temporary files and obvious startup clutter.
+4. In **Storage Management**, use deep cleanup carefully and review file categories before deleting anything.
+5. In **Process Management**, close runaway apps and disable non-essential startup items only if you understand what they do.
+6. In **Windows Update** and **Protection** sections, confirm updates and security status are current.
+7. Keep this cadence:
+	- **Weekly:** Health Check, restart PC, verify free disk space.
+	- **Monthly:** Review startup apps, uninstall unused programs, run full Windows Security scan.
+	- **Quarterly:** Check driver and BIOS or firmware updates from the device manufacturer, review backup restore readiness.
+8. Keep at least 20% free space on the system drive to reduce update and performance issues.
+
+> **Why this matters:** Most Windows problems are preventable drift. A small maintenance routine catches disk pressure, startup bloat, and stale updates before they become hard failures. PC Manager is useful as a single dashboard, but avoid aggressive "one-click" cleaning habits and always review what will be removed.
+
+## 10. Last resort: repair install or clean reinstall Windows 11 (45-120+ minutes)
 1. Back up important files first.
 2. Download Microsoft's installer tools: https://www.microsoft.com/software-download/windows11.
 3. Choose **Keep personal files and apps** for a repair install.
@@ -95,7 +110,7 @@ The biggest mistake is changing too many things too fast. Make one change, test,
 
 > **Why this matters:** Reinstalling works, but it is time-consuming. Try the earlier sections first.
 
-## 10. Wrap-up checklist
+## 11. Wrap-up checklist
 1. Confirm the original issue is fixed.
 2. Re-enable internet if malware checks are complete and clean.
 3. Tell the person what changed in plain language.
