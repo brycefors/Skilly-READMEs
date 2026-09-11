@@ -10,7 +10,8 @@ The biggest mistake is changing too many things too fast. Make one change, test,
 1. Reboot the PC normally.
 2. Check for updates in **Settings > Windows Update > Check for updates**.
 3. Confirm basics: power cable, battery level, Wi-Fi or Ethernet, and monitor connection.
-4. Open **Task Manager** and sort by CPU, Memory, and Disk to spot anything maxing out resources.
+4. Open **Task Manager** and sort by CPU, Memory, and Disk to spot anything maxing out resources. Be aware that it is common for Windows 11 to use most
+of RAM for caching.
 5. If Task Manager is not enough, run **Process Explorer** (Sysinternals) to inspect parent/child process trees, command lines, and loaded modules: https://learn.microsoft.com/en-us/sysinternals/downloads/process-explorer.
 
 > **Why this matters:** A lot of "serious" issues are just a stuck process, pending update, or simple connection problem.
@@ -87,19 +88,13 @@ The biggest mistake is changing too many things too fast. Make one change, test,
 > **Why this matters:** Low disk space causes updates, caching, and apps to fail in unpredictable ways.
 
 ## 9. Long-term maintenance plan (10-30 minutes per week)
-1. Install or update **Microsoft PC Manager** from the Microsoft Store and keep it on the latest version.
-2. Open **PC Manager > Settings** and enable **Start Microsoft PC Manager automatically when I sign in to Windows**.
-3. Once per week, open **PC Manager > Health Check** and remove temporary files and obvious startup clutter.
-4. In **Storage Management**, use deep cleanup carefully and review file categories before deleting anything.
-5. In **Process Management**, close runaway apps and disable non-essential startup items only if you understand what they do.
-6. In **Windows Update** and **Protection** sections, confirm updates and security status are current.
-7. Keep this cadence:
+1. Keep this cadence:
 	- **Weekly:** Health Check, restart PC, verify free disk space.
-	- **Monthly:** Review startup apps, uninstall unused programs, run full Windows Security scan.
+	- **Monthly:** Review startup apps, uninstall unused programs, run full Windows Security scan. Check for Windows updates updates.
 	- **Quarterly:** Check driver and BIOS or firmware updates from the device manufacturer, review backup restore readiness.
-8. Keep at least 20% free space on the system drive to reduce update and performance issues.
+2. Keep at least 20% free space on the system drive to reduce update and performance issues.
 
-> **Why this matters:** Most Windows problems are preventable drift. A small maintenance routine catches disk pressure, startup bloat, and stale updates before they become hard failures. PC Manager is useful as a single dashboard, but avoid aggressive "one-click" cleaning habits and always review what will be removed.
+> **Why this matters:** Most Windows problems are preventable drift. A small maintenance routine catches disk pressure, startup bloat, and stale updates before they become hard failures.
 
 ## 10. Last resort: repair install or clean reinstall Windows 11 (45-120+ minutes)
 1. Back up important files first.
