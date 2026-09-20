@@ -28,6 +28,51 @@ There are three enforcement strategies. They are not mutually exclusive, because
 
 5. Complete **Section 2** regardless of which path you chose. It is shared setup.
 
+### 1.1 Tradeoffs Between Block and Redirect
+
+*Time: 3 mins | Reference only, no changes here*
+
+Hybrid is the two combined, so it inherits from both columns. Read these before you commit, because the downsides are the parts that generate support calls from your own household.
+
+| | Block | Redirect |
+|---|---|---|
+| Rogue device behavior | Times out, then usually falls back | Works normally, silently filtered |
+| Firewall log | Names every offender | Shows nothing |
+| Extra rules needed | None | Hairpin NAT when the resolver is a separate box |
+| Per-client stats in Pi-hole | Intact | Collapsed onto the firewall IP |
+| IPv6 | Covered by the same rule | Needs a second NAT rule |
+| Loop risk | None | Real when scoped to `LAN net` |
+
+**Block upsides**
+
+1. Every rogue query lands in the firewall log with a client IP, which is the only way you discover which device is misbehaving.
+2. Two filter rules finish the job. No NAT, no hairpin, no source scoping, no loop risk.
+3. Anything you did not anticipate fails closed rather than being quietly handled.
+4. One rule covers IPv4 and IPv6 together because **Version** accepts `IPv4+IPv6`.
+
+**Block downsides**
+
+1. Hardcoded clients break outright. Chromecast, Google Home, and some Roku builds have no fallback and simply stop resolving.
+2. Well-behaved clients time out before falling back, which users report as "the internet is slow" rather than as a DNS problem.
+3. A single chatty IoT device can flood the log.
+
+**Redirect upsides**
+
+1. Nothing breaks. The device believes it reached `8.8.8.8`, gets an answer immediately, and never retries.
+2. Hardcoded devices run through your blocklists anyway, so you gain filtering rather than just denying access.
+3. There is no user-visible symptom to explain to anyone in the house.
+
+**Redirect downsides**
+
+1. You go blind. Redirected traffic never reaches the block rule, so nothing is logged and you stop finding new offenders.
+2. A separate resolver machine forces you into hairpin NAT plus switching Source NAT off `Automatic`.
+3. Hairpin rewrites the source, so every redirected query appears in Pi-hole as coming from the firewall.
+4. That same rewrite makes the whole network share one client's rate limit budget, covered in Section 10.
+5. Scoping to `LAN net` with a public upstream creates the resolver loop described in Section 6.
+6. The NAT rule is IPv4 only unless you build a second one.
+
+> **Why this matters:** Hybrid exists to keep the Redirect upsides while shrinking its blast radius. Naming the devices in `DNS_Redirect` restores the log for everything else, keeps the resolver out of the NAT rule so no loop is possible, and limits the rate limit and attribution damage to a handful of hosts. The cost is maintenance. A new casting device will not redirect itself, so you have to spot it in the block log and add it to the alias.
+
 ## 2. Create the Approved Resolver Alias
 
 *Time: 8 mins*
