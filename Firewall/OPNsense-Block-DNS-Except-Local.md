@@ -26,16 +26,24 @@ There are two enforcement strategies and they behave very differently.
 
 ## 2. Create the Approved Resolver Alias
 
-*Time: 5 mins*
+*Time: 8 mins*
 
 1. Navigate to **Firewall** > **Aliases** and click **+**.
 2. Set **Name** to `Allowed_DNS`.
 3. Set **Type** to `Host(s)`.
 4. Add the LAN IP of every resolver clients are permitted to reach. For a typical setup that is your **resolver IP** and your **OPNsense LAN IP**.
 5. Set **Description** to `Approved internal DNS resolvers`.
-6. Click **Save**, then click **Apply**.
+6. Click **Save**.
 
    > **Why this matters:** Aliases are referenced by name in rules, so swapping a resolver IP later means editing one object instead of hunting through six rules. Include the OPNsense LAN IP even if clients are pointed at a separate blocker, otherwise a direct query to the firewall during troubleshooting will be blocked and you will chase a phantom outage.
+
+7. Click **+** again and set **Name** to `DNS_Exempt`.
+8. Set **Type** to `Host(s)`.
+9. Add the **resolver IP**, plus the IP of anything that genuinely has to reach outside DNS. Common entries are a work laptop on a corporate VPN, a NAS running its own resolver, or a guest device you do not control.
+10. Set **Description** to `Hosts allowed to bypass DNS enforcement`.
+11. Click **Save**, then click **Apply**.
+
+    > **Why this matters:** This is the escape hatch, and it belongs in its own alias rather than as an invert on the block rule. Adding a device later is one edit in one object with no rule reordering and no risk of changing what the block rule matches. Give every host in here a static lease first, because a DHCP address that moves turns the exemption into a hole pointed at the wrong device.
 
 ## 3. Allow DNS to the Approved Resolvers
 
@@ -59,15 +67,17 @@ There are two enforcement strategies and they behave very differently.
 8. Set **Protocol** to `TCP/UDP`.
 9. Set **Source** to `LAN net`.
 10. Set **Destination** to the `Allowed_DNS` alias.
-11. Set **Destination Port** to `DNS`.
+11. Set **Destination Port** to `DOMAIN (53)`.
 12. On the **Organisation** tab, set **Description** to `Allow DNS to approved resolvers`.
 13. Click **Save**.
 
     > **Why this matters:** DNS uses UDP for normal queries and TCP for responses larger than 512 bytes, which includes most DNSSEC traffic. Allowing only UDP produces the worst kind of failure, where most lookups work and a handful of domains mysteriously time out.
 
-14. If your resolver forwards upstream to a public DNS provider instead of to Unbound on OPNsense, add a second **Pass** rule with **Source** set to the **resolver IP** and **Destination** set to `any` on **Destination Port** `DNS`. Give it a **Sequence** just above the block rule you build next.
+14. Click **+** and build a second **Pass** rule with **Interface (rule)** `LAN`, **Direction** `in`, **Version** `IPv4+IPv6`, **Protocol** `TCP/UDP`, **Source** set to the `DNS_Exempt` alias, **Destination** `any`, and **Destination Port** `DOMAIN (53)`.
+15. Set its **Description** to `DNS enforcement exemptions` and give it a **Sequence** below the block rule you build next.
+16. Click **Save**.
 
-    > **Why this matters:** Your resolver sits on the LAN, so the block rule in the next section applies to its own upstream queries too. Without an exemption you cut the resolver off from the internet and break every lookup on the network.
+    > **Why this matters:** Your resolver sits on the LAN, so the block rule in the next section applies to its own upstream queries too. Without this rule you cut the resolver off from the internet and break every lookup on the network. The same rule covers every other host you drop into the alias, so you never touch the ruleset again to grant an exception.
 
 ## 4. Block Everything Else on Port 53
 
@@ -79,9 +89,12 @@ There are two enforcement strategies and they behave very differently.
 4. Set **Direction** to `in`.
 5. Set **Version** to `IPv4+IPv6`.
 6. Set **Protocol** to `TCP/UDP`.
-7. Set **Source** to `LAN net`.
+7. Set **Source** to `LAN net` and leave **Invert Source** unchecked.
+
+   > **Why this matters:** It is tempting to point **Source** at `DNS_Exempt` and tick **Invert Source** instead of running a separate pass rule. Avoid it. Inverting means "any address that is not in this alias," which drops the `LAN net` scoping entirely and matches traffic from anywhere that reaches this interface. You also collapse the allow decision and the block decision into one evaluation counter, so you lose the ability to see which exempt device is actually using its exemption.
+
 8. Set **Destination** to `any`.
-9. Set **Destination Port** to `DNS`.
+9. Set **Destination Port** to `DOMAIN (53)`.
 10. Check **Log** so rogue clients show up in the firewall log.
 11. On the **Organisation** tab, set **Description** to `Block rogue DNS`.
 12. Set **Sequence** to a number **higher** than the pass rules from Section 3.
@@ -135,9 +148,13 @@ There are two enforcement strategies and they behave very differently.
 
     > **Why this matters:** The inverted destination is the whole trick. It means "everything except my approved resolvers", so traffic already headed to your resolver passes through untouched and only strays get rewritten. Without the invert you create a redirect loop where the resolver's own traffic is bounced back at itself.
 
-11. Skip to step 14 if your redirect target is the **OPNsense LAN IP** rather than a separate machine.
-12. Navigate to **Firewall** > **NAT** > **Source NAT (Outbound)**, set the mode to `Hybrid Source NAT rule generation`, click **Save**, then click **+**.
-13. Build the hairpin rule across the tabs:
+11. Add a second Destination NAT rule above this one if you populated `DNS_Exempt` in Section 2. Use the same **Interface**, **Protocol**, and **Destination Port**, set **Source Address** to `DNS_Exempt`, and on the **Options** tab set **Firewall rule** to `Pass`. On the **Translation** tab leave **Redirect Target IP** empty and tick **Disable** at the top of the **Organization** tab.
+
+    > **Why this matters:** NAT runs before the filter rules, so an exempt host gets its query rewritten to your resolver long before the pass rule from Section 3 ever sees it. A disabled rule placed above the redirect acts as a "do not translate" marker, because NAT stops at the first match and a disabled entry is not a match to translate on. If your build does not honor that, set **Redirect Target IP** to the destination itself so the translation is a no-op instead.
+
+12. Skip to step 15 if your redirect target is the **OPNsense LAN IP** rather than a separate machine.
+13. Navigate to **Firewall** > **NAT** > **Source NAT (Outbound)**, set the mode to `Hybrid Source NAT rule generation`, click **Save**, then click **+**.
+14. Build the hairpin rule across the tabs:
     - **Interface** tab: **Interface** `LAN`, **Version** `IPv4`, **Protocol** `TCP/UDP`
     - **Source** tab: **Source Address** `LAN net`
     - **Destination** tab: **Destination Address** your **resolver IP**, **Destination Port** `DNS`
@@ -146,7 +163,7 @@ There are two enforcement strategies and they behave very differently.
 
     > **Why this matters:** The client and the resolver are on the same subnet. After the redirect, the resolver sees a query from `192.168.1.50` and answers it directly, but the client is waiting for a reply from `8.8.8.8` and discards the mismatched packet. Rewriting the source to the firewall's LAN address forces the reply back through OPNsense so the address can be translated correctly.
 
-14. Click **Save**, then click **Apply**.
+15. Click **Save**, then click **Apply**.
 
 ## 7. Handle DNS over HTTPS
 
@@ -230,10 +247,11 @@ HaGeZi maintains a **DoH/VPN/Tor/Proxy Bypass** list built for exactly this prob
 
    > **Why this matters:** Existing connections keep flowing on their established state entry and ignore new rules entirely. A long-lived client can appear to bypass a correct block rule for hours until its state expires.
 
-5. Confirm the resolver exemption from step 14 of Section 3 exists if the resolver itself stops resolving.
-6. Check for an IPv6 resolver with `ipconfig /all` on Windows or `resolvectl status` on Linux if a device still bypasses everything.
-7. Remove the `HaGeZi_DoH_IPs` rule from Section 7.4 first if a legitimate website suddenly breaks. That rule is the most likely culprit for collateral damage.
-8. Look for a VPN client on the device if a single machine ignores all of the above. Tunneled DNS leaves the LAN encrypted on the VPN port and your port 53 rules never see it.
-9. Log in at the **console** and choose option **8** for a shell, then run `pfctl -d` to disable the packet filter temporarily if you lock yourself out of the web GUI entirely.
+5. Confirm the `DNS_Exempt` pass rule from Section 3 exists and that the resolver's own IP is in the alias if the resolver itself stops resolving.
+6. Add the offending client to `DNS_Exempt` under **Firewall** > **Aliases** if one specific device breaks and you are willing to let it through. The change takes effect on **Apply** with no rule edits.
+7. Check for an IPv6 resolver with `ipconfig /all` on Windows or `resolvectl status` on Linux if a device still bypasses everything.
+8. Remove the `HaGeZi_DoH_IPs` rule from Section 7.4 first if a legitimate website suddenly breaks. That rule is the most likely culprit for collateral damage.
+9. Look for a VPN client on the device if a single machine ignores all of the above. Tunneled DNS leaves the LAN encrypted on the VPN port and your port 53 rules never see it.
+10. Log in at the **console** and choose option **8** for a shell, then run `pfctl -d` to disable the packet filter temporarily if you lock yourself out of the web GUI entirely.
 
    > **Why this matters:** `pfctl -d` drops all filtering, including the rules protecting your WAN. Use it only long enough to fix the bad rule in the GUI, then re-enable with `pfctl -e` or reboot.
