@@ -48,7 +48,7 @@ This guide is written for a **1 Gbps** plan. A gigabit line never actually deliv
    - **FQ-CoDel quantum:** `1514`
    - **FQ-CoDel limit:** `10240`
    - **FQ-CoDel flows:** `1024`
-   - **ECN:** checked
+   - **(FQ-)CoDel ECN:** checked
 7. Set **Description** to `wan-download`.
 8. Click **Save**.
 
