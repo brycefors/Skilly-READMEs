@@ -132,6 +132,8 @@ There are two enforcement strategies and they behave very differently.
 
 > **Menu naming:** Recent OPNsense releases renamed the NAT pages. **Port Forward** is now **Destination NAT (Port Forward)** and **Outbound** is now **Source NAT (Outbound)**. Older guides use the old names for the same pages. The rule dialog is also split into tabs (**Organization**, **Interface**, **Source**, **Destination**, **Translation**, **Options**), so the fields below are grouped rather than listed on one long form.
 
+> **Order of operations:** NAT runs **before** the filter rules, not after. A query to `8.8.8.8` gets its destination rewritten to your resolver IP first, and the packet that reaches the Rules page already has the resolver as its destination. Two consequences follow from that. The pass rule from Section 3 is what permits redirected traffic, because the translated destination matches `Allowed_DNS`. The block rule from Section 4 never sees a rogue destination on this path, so it will not log the devices you redirected.
+
 1. Navigate to **Firewall** > **NAT** > **Destination NAT (Port Forward)** and click **+**.
 2. On the **Interface** tab, set **Interface** to `LAN`, **Version** to `IPv4`, and **Protocol** to `TCP/UDP`.
 3. On the **Source** tab, set **Source Address** to `LAN net`.
@@ -141,20 +143,24 @@ There are two enforcement strategies and they behave very differently.
 7. On the **Options** tab, set **NAT Reflection** to `Disable`.
 8. Still on the **Options** tab, set **Firewall rule** to `Pass`.
 
-   > **Why this matters:** This field replaced the old `Filter rule association`, and the old `Add associated filter rule` choice is now simply `Pass`. It creates a hidden linked rule that permits the redirected traffic. Leaving it on `Manual` builds the translation with nothing to allow it, so the query gets rewritten and then dropped by your own block rule from Section 4. The third option, `Register rule`, puts a visible but uneditable rule on the Rules page if you would rather see it listed.
+   > **Why this matters:** This field replaced the old `Filter rule association`, and the old `Add associated filter rule` choice is now simply `Pass`. It creates a linked rule matching the **translated** traffic. If you followed Section 3 the redirect already works without it, because the rewritten destination matches `Allowed_DNS` and that pass rule lets it through. Setting this to `Pass` makes the redirect self-contained instead, so it keeps working if you later tighten the Section 3 rule or point the redirect at a host you never added to the alias. The third option, `Register rule`, does the same thing but puts a visible, uneditable entry on the Rules page.
 
 9. On the **Organization** tab, set **Description** to `Hijack rogue DNS to local resolver`.
 10. Click **Save**, then click **Apply**.
 
-    > **Why this matters:** The inverted destination is the whole trick. It means "everything except my approved resolvers", so traffic already headed to your resolver passes through untouched and only strays get rewritten. Without the invert you create a redirect loop where the resolver's own traffic is bounced back at itself.
+    > **Why this matters:** The inverted destination means "everything except my approved resolvers", so a query already headed to your resolver is left alone and only strays get rewritten. Without the invert the rule matches the exact opposite set, redirecting resolver-bound traffic back to the resolver as a pointless no-op while every rogue query sails past untouched.
 
-11. Add a second Destination NAT rule above this one if you populated `DNS_Exempt` in Section 2. Use the same **Interface**, **Protocol**, and **Destination Port**, set **Source Address** to `DNS_Exempt`, and on the **Options** tab set **Firewall rule** to `Pass`. On the **Translation** tab leave **Redirect Target IP** empty and tick **Disable** at the top of the **Organization** tab.
+11. Check **Invert Source** on the **Source** tab and change **Source Address** from `LAN net` to the `DNS_Exempt` alias if your resolver forwards to a **public** upstream such as `1.1.1.1` or `9.9.9.9`.
 
-    > **Why this matters:** NAT runs before the filter rules, so an exempt host gets its query rewritten to your resolver long before the pass rule from Section 3 ever sees it. A disabled rule placed above the redirect acts as a "do not translate" marker, because NAT stops at the first match and a disabled entry is not a match to translate on. If your build does not honor that, set **Redirect Target IP** to the destination itself so the translation is a no-op instead.
+    > **Why this matters:** This is the loop. `LAN net` includes the resolver itself, so when your resolver forwards a query upstream that packet has a LAN source, a destination outside `Allowed_DNS`, and port 53. It matches this rule and gets redirected straight back to the resolver, which then queries itself. Pi-hole surfaces it as SERVFAIL or "maximum number of concurrent DNS queries reached", and every lookup on the network dies with it. Inverting the source to mean "everything except the exempt hosts" takes the resolver out of the rule. There is no cleaner option here, because the Destination NAT dialog has no equivalent of Source NAT's **Do not NAT** and a **Disabled** rule is simply not loaded rather than treated as an exclusion.
 
-12. Skip to step 15 if your redirect target is the **OPNsense LAN IP** rather than a separate machine.
-13. Navigate to **Firewall** > **NAT** > **Source NAT (Outbound)**, set the mode to `Hybrid Source NAT rule generation`, click **Save**, then click **+**.
-14. Build the hairpin rule across the tabs:
+12. Skip the invert entirely if your resolver forwards to **Unbound on OPNsense**, or if your resolver *is* Unbound on OPNsense.
+
+    > **Why this matters:** The firewall's LAN IP is already in `Allowed_DNS`, so the inverted destination excludes that traffic and no loop is possible. Unbound running on OPNsense is safer still, because its queries originate on the firewall and never arrive on the LAN interface where this rule lives.
+
+13. Skip to step 16 if your redirect target is the **OPNsense LAN IP** rather than a separate machine.
+14. Navigate to **Firewall** > **NAT** > **Source NAT (Outbound)**, set the mode to `Hybrid Source NAT rule generation`, click **Save**, then click **+**.
+15. Build the hairpin rule across the tabs:
     - **Interface** tab: **Interface** `LAN`, **Version** `IPv4`, **Protocol** `TCP/UDP`
     - **Source** tab: **Source Address** `LAN net`
     - **Destination** tab: **Destination Address** your **resolver IP**, **Destination Port** `DOMAIN (53)`
@@ -163,7 +169,7 @@ There are two enforcement strategies and they behave very differently.
 
     > **Why this matters:** The client and the resolver are on the same subnet. After the redirect, the resolver sees a query from `192.168.1.50` and answers it directly, but the client is waiting for a reply from `8.8.8.8` and discards the mismatched packet. Rewriting the source to the firewall's LAN address forces the reply back through OPNsense so the address can be translated correctly. The cost is that every redirected query now appears to come from the firewall, so those lookups lose their per-client attribution in your resolver's statistics.
 
-15. Click **Save**, then click **Apply**.
+16. Click **Save**, then click **Apply**.
 
 ### 6.1 When the Redirect Returns Nothing
 
@@ -184,9 +190,9 @@ There are two enforcement strategies and they behave very differently.
 4. Confirm the hairpin rule's **Interface** is `LAN`, not WAN.
 5. Confirm its **Destination Address** is the resolver IP and **Destination Port** is `DNS`.
 6. Confirm **Translate Source IP** is `Interface address`, then jump to step 11.
-7. Check **Firewall rule** on the Destination NAT rule's **Options** tab is `Pass` and not `Manual`, then jump to step 11.
+7. Confirm your **Redirect Target IP** is a member of the `Allowed_DNS` alias, or set **Firewall rule** on the Destination NAT rule's **Options** tab to `Pass`. Jump to step 11.
 
-   > **Why this matters:** On `Manual` the translation happens with no rule permitting the result, so your own port 53 block rule from Section 4 drops the query immediately after rewriting it.
+   > **Why this matters:** On `Manual` nothing is auto-generated, so the translated query survives only if the Section 3 pass rule matches it. That rule matches on destination `Allowed_DNS`, so a redirect target missing from the alias gets rewritten and then dropped by the Section 4 block rule a moment later.
 
 8. Check the Destination NAT rule's **Interface** is `LAN`. It has to be the interface the query **arrives on**, not the one it leaves by.
 9. Check the rule's evaluation counter. Zero hits means the traffic never matched the rule at all.
@@ -280,7 +286,7 @@ HaGeZi maintains a **DoH/VPN/Tor/Proxy Bypass** list built for exactly this prob
 6. Run the same query against your approved resolver IP and confirm it succeeds either way.
 7. Run `dig @8.8.8.8 +tcp google.com` to confirm the TCP side is covered too.
 8. Navigate to **Firewall** > **Log Files** > **Live View** and filter on port `53`.
-9. Note every client IP that keeps hitting the block rule. Those are your rogue devices.
+9. Note every client IP that keeps hitting the block rule. Those are your rogue devices. Read the Destination NAT rule's match counter instead if you chose Redirect, because NAT rewrites the destination before the block rule is ever consulted.
 10. Open a browser and confirm a DoH test page reports that DoH is **not** in use.
 11. Reboot one client and confirm name resolution still works after the DHCP lease renews.
 
@@ -296,10 +302,14 @@ HaGeZi maintains a **DoH/VPN/Tor/Proxy Bypass** list built for exactly this prob
    > **Why this matters:** Existing connections keep flowing on their established state entry and ignore new rules entirely. A long-lived client can appear to bypass a correct block rule for hours until its state expires.
 
 5. Confirm the `DNS_Exempt` pass rule from Section 3 exists and that the resolver's own IP is in the alias if the resolver itself stops resolving.
-6. Add the offending client to `DNS_Exempt` under **Firewall** > **Aliases** if one specific device breaks and you are willing to let it through. The change takes effect on **Apply** with no rule edits.
-7. Check for an IPv6 resolver with `ipconfig /all` on Windows or `resolvectl status` on Linux if a device still bypasses everything.
-8. Remove the `HaGeZi_DoH_IPs` rule from Section 7.4 first if a legitimate website suddenly breaks. That rule is the most likely culprit for collateral damage.
-9. Look for a VPN client on the device if a single machine ignores all of the above. Tunneled DNS leaves the LAN encrypted on the VPN port and your port 53 rules never see it.
-10. Log in at the **console** and choose option **8** for a shell, then run `pfctl -d` to disable the packet filter temporarily if you lock yourself out of the web GUI entirely.
+6. Suspect a redirect loop if your resolver logs SERVFAIL or reports that it hit its concurrent query limit. Apply step 11 of Section 6 to exclude the resolver from the Destination NAT rule.
+
+   > **Why this matters:** A resolver forwarding to a public upstream matches your own redirect rule, gets pointed back at itself, and stops answering anything. The tell is that the failure is total and the resolver looks busy rather than idle.
+
+7. Add the offending client to `DNS_Exempt` under **Firewall** > **Aliases** if one specific device breaks and you are willing to let it through. The change takes effect on **Apply** with no rule edits.
+8. Check for an IPv6 resolver with `ipconfig /all` on Windows or `resolvectl status` on Linux if a device still bypasses everything.
+9. Remove the `HaGeZi_DoH_IPs` rule from Section 7.4 first if a legitimate website suddenly breaks. That rule is the most likely culprit for collateral damage.
+10. Look for a VPN client on the device if a single machine ignores all of the above. Tunneled DNS leaves the LAN encrypted on the VPN port and your port 53 rules never see it.
+11. Log in at the **console** and choose option **8** for a shell, then run `pfctl -d` to disable the packet filter temporarily if you lock yourself out of the web GUI entirely.
 
    > **Why this matters:** `pfctl -d` drops all filtering, including the rules protecting your WAN. Use it only long enough to fix the bad rule in the GUI, then re-enable with `pfctl -e` or reboot.
