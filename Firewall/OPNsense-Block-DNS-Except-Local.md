@@ -136,8 +136,8 @@ There are two enforcement strategies and they behave very differently.
 2. On the **Interface** tab, set **Interface** to `LAN`, **Version** to `IPv4`, and **Protocol** to `TCP/UDP`.
 3. On the **Source** tab, set **Source Address** to `LAN net`.
 4. On the **Destination** tab, check **Invert Destination**, then set **Destination Address** to the `Allowed_DNS` alias.
-5. Still on the **Destination** tab, set **Destination Port** to `DNS`.
-6. On the **Translation** tab, set **Redirect Target IP** to your **resolver IP** and **Redirect Target Port** to `DNS`.
+5. Still on the **Destination** tab, set **Destination Port** to `DOMAIN (53)`.
+6. On the **Translation** tab, set **Redirect Target IP** to your **resolver IP** and **Redirect Target Port** to `DOMAIN (53)`.
 7. On the **Options** tab, set **NAT Reflection** to `Disable`.
 8. Still on the **Options** tab, set **Firewall rule** to `Pass`.
 
@@ -157,15 +157,52 @@ There are two enforcement strategies and they behave very differently.
 14. Build the hairpin rule across the tabs:
     - **Interface** tab: **Interface** `LAN`, **Version** `IPv4`, **Protocol** `TCP/UDP`
     - **Source** tab: **Source Address** `LAN net`
-    - **Destination** tab: **Destination Address** your **resolver IP**, **Destination Port** `DNS`
-    - **Translation** tab: **Translate Source IP** `Interface address`
+    - **Destination** tab: **Destination Address** your **resolver IP**, **Destination Port** `DOMAIN (53)`
+    - **Translation** tab: **Translate Source IP** `Interface address` (or blank)
     - **Organization** tab: **Description** `Hairpin NAT for redirected DNS`
 
-    > **Why this matters:** The client and the resolver are on the same subnet. After the redirect, the resolver sees a query from `192.168.1.50` and answers it directly, but the client is waiting for a reply from `8.8.8.8` and discards the mismatched packet. Rewriting the source to the firewall's LAN address forces the reply back through OPNsense so the address can be translated correctly.
+    > **Why this matters:** The client and the resolver are on the same subnet. After the redirect, the resolver sees a query from `192.168.1.50` and answers it directly, but the client is waiting for a reply from `8.8.8.8` and discards the mismatched packet. Rewriting the source to the firewall's LAN address forces the reply back through OPNsense so the address can be translated correctly. The cost is that every redirected query now appears to come from the firewall, so those lookups lose their per-client attribution in your resolver's statistics.
 
 15. Click **Save**, then click **Apply**.
 
-## 7. Handle DNS over HTTPS
+### 6.1 When the Redirect Returns Nothing
+
+*Time: 10 mins | Work these in order, the first step tells you which half is broken*
+
+1. Open your resolver's **query log** and run the failing lookup again from a client.
+2. Read **which source IP** the query arrived from. That single field identifies the fault.
+   - **The client's own IP**, for example `192.168.90.50`: the Destination NAT works but the **hairpin rule is missing or not matching**. Go to step 3.
+   - **The OPNsense LAN IP**: both NAT rules work and the problem is downstream. Skip to step 7.
+   - **Nothing at all**: the Destination NAT rule is not matching. Skip to step 8.
+
+   > **Why this matters:** The query reaching the resolver proves the redirect fired. What breaks the round trip is the reply path, and the source address is the only thing that determines it. A resolver on the same subnet as the client answers the client *directly* and never routes back through the firewall, so the translation is never undone. The client is waiting for a packet from `8.8.8.8`, gets one from `192.168.90.11`, and discards it as unsolicited. You get a timeout with a perfectly healthy query log on the resolver.
+
+3. Confirm **Firewall** > **NAT** > **Source NAT (Outbound)** is set to `Hybrid Source NAT rule generation` and not `Automatic`.
+
+   > **Why this matters:** Manual rules are ignored entirely in automatic mode. The rule is listed on the page and looks active, but it is never loaded into the ruleset.
+
+4. Confirm the hairpin rule's **Interface** is `LAN`, not WAN.
+5. Confirm its **Destination Address** is the resolver IP and **Destination Port** is `DNS`.
+6. Confirm **Translate Source IP** is `Interface address`, then jump to step 11.
+7. Check **Firewall rule** on the Destination NAT rule's **Options** tab is `Pass` and not `Manual`, then jump to step 11.
+
+   > **Why this matters:** On `Manual` the translation happens with no rule permitting the result, so your own port 53 block rule from Section 4 drops the query immediately after rewriting it.
+
+8. Check the Destination NAT rule's **Interface** is `LAN`. It has to be the interface the query **arrives on**, not the one it leaves by.
+9. Check the rule's evaluation counter. Zero hits means the traffic never matched the rule at all.
+10. Confirm **Invert Destination** is checked and **Destination Address** is `Allowed_DNS`.
+
+    > **Why this matters:** Without the invert the rule matches only queries already headed to your approved resolvers, which is the exact opposite of what you want, and rogue queries to `8.8.8.8` sail past untouched.
+
+11. Navigate to **Firewall** > **Diagnostics** > **States**, filter on the client IP, and reset the matching entries.
+
+    > **Why this matters:** Every failed attempt you made while debugging left a state entry behind. Those entries keep using the ruleset that was loaded when they were created, so a correct fix looks like it changed nothing until they expire.
+
+12. Run a packet capture under **Interfaces** > **Diagnostics** > **Packet Capture** on the `LAN` interface with the host set to your resolver IP if it still fails.
+
+    > **Why this matters:** The capture shows the translated query leaving and the reply coming back, including the addresses on both. It settles in seconds what rule inspection can only infer.
+
+
 
 *Time: 15 mins | Requires: a resolver that accepts subscription blocklists*
 
@@ -226,15 +263,26 @@ HaGeZi maintains a **DoH/VPN/Tor/Proxy Bypass** list built for exactly this prob
 
 *Time: 5 mins*
 
-1. Run `Resolve-DnsName google.com -Server 8.8.8.8` from a Windows client, or `dig @8.8.8.8 google.com` from Linux or macOS.
-2. Confirm a **timeout** if you chose Block.
-3. Confirm an **answer** if you chose Redirect, then verify the query appears in your resolver's query log as if it were normal traffic.
-4. Run the same query against your approved resolver IP and confirm it succeeds either way.
-5. Run `dig @8.8.8.8 +tcp google.com` to confirm the TCP side is covered too.
-6. Navigate to **Firewall** > **Log Files** > **Live View** and filter on port `53`.
-7. Note every client IP that keeps hitting the block rule. Those are your rogue devices.
-8. Open a browser and confirm a DoH test page reports that DoH is **not** in use.
-9. Reboot one client and confirm name resolution still works after the DHCP lease renews.
+1. Run every test below from a **LAN client**, never from the OPNsense box itself.
+
+   > **Why this matters:** The rules in this guide match traffic arriving *on* the LAN interface. A query originating on the firewall never crosses that interface, so it skips both the block rule and the NAT redirect and will always appear to work.
+
+2. Run `Resolve-DnsName google.com -Server 8.8.8.8` from a Windows client, or `dig @8.8.8.8 google.com` from Linux or macOS.
+3. Confirm a **timeout** if you chose Block.
+4. Confirm an **answer** if you chose Redirect.
+
+   > **Why this matters:** The client cannot see the translation, so `nslookup` still prints `Server: dns.google` and `Address: 8.8.8.8` in its header. On Windows you will also likely see `DNS request timed out` and `Default Server: UnKnown` above the answer, because nslookup does a reverse lookup on the server address first and your resolver does not answer it the way Google would. Both are cosmetic and neither means the redirect failed.
+
+5. Prove the redirect actually happened rather than assuming it. Query a domain your blocklist blocks, for example `nslookup doubleclick.net 8.8.8.8`, and confirm the reply is `0.0.0.0` or NXDOMAIN.
+
+   > **Why this matters:** A successful answer only tells you something replied. Real `8.8.8.8` returns the genuine address for a blocked domain, so a filtered reply is the only result that can have come from your own resolver. Checking the NAT rule's match counter or your resolver's query log confirms it a second way.
+
+6. Run the same query against your approved resolver IP and confirm it succeeds either way.
+7. Run `dig @8.8.8.8 +tcp google.com` to confirm the TCP side is covered too.
+8. Navigate to **Firewall** > **Log Files** > **Live View** and filter on port `53`.
+9. Note every client IP that keeps hitting the block rule. Those are your rogue devices.
+10. Open a browser and confirm a DoH test page reports that DoH is **not** in use.
+11. Reboot one client and confirm name resolution still works after the DHCP lease renews.
 
 ## 9. Troubleshooting
 
