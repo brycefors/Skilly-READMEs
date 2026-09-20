@@ -236,12 +236,16 @@ HaGeZi maintains a **DoH/VPN/Tor/Proxy Bypass** list built for exactly this prob
 
 ### 7.2 Return NXDOMAIN for the Firefox Canary
 
-1. Add `use-application-dns.net` to your resolver's blocklist. It is already covered by the HaGeZi list above on most builds, but add it manually if you skipped that step.
-2. Set your blocker's blocking mode to `NXDOMAIN`:
-   - **Pi-hole:** **Settings** > **DNS** > **Blocking mode** > `NXDOMAIN`
+1. Skip this whole subsection if you run **Pi-hole v6**. The `dns.specialDomains.mozillaCanary` setting defaults to `true` and already forces NXDOMAIN on that domain no matter what your blocking mode is.
+2. Add `use-application-dns.net` to your resolver's blocklist on any other resolver. The HaGeZi list above covers it on most builds, but add it manually if you skipped that step.
+3. Set your blocker's blocking mode to `NXDOMAIN`:
    - **AdGuard Home:** **Settings** > **DNS settings** > **Blocking mode** > `NXDOMAIN`
 
-   > **Why this matters:** Firefox queries that one canary domain at startup and disables DoH only if the reply is `NXDOMAIN`. Pi-hole's default `NULL` mode answers `0.0.0.0` instead, which Firefox reads as a successful lookup, so the canary silently fails and DoH stays on.
+   > **Why this matters:** Firefox queries that one canary domain at startup and disables DoH only if the reply is `NXDOMAIN`. A default `NULL` blocking mode answers `0.0.0.0` instead, which Firefox reads as a successful lookup, so the canary silently fails and DoH stays on.
+
+4. Confirm `dns.specialDomains.iCloudPrivateRelay` and `dns.specialDomains.designatedResolver` are also on if you run Pi-hole v6. Both default to `true`.
+
+   > **Why this matters:** These close two bypasses that port rules cannot touch. iCloud Private Relay tunnels Apple device traffic past your resolver entirely, and Discovery of Designated Resolvers (RFC 9462) lets a client find an encrypted resolver by querying `resolver.arpa`. On any resolver that lacks these toggles you have to blocklist `mask.icloud.com`, `mask-h2.icloud.com`, and the `resolver.arpa` zone yourself.
 
 ### 7.3 Turn Off Browser DoH by Policy
 
@@ -313,3 +317,27 @@ HaGeZi maintains a **DoH/VPN/Tor/Proxy Bypass** list built for exactly this prob
 11. Log in at the **console** and choose option **8** for a shell, then run `pfctl -d` to disable the packet filter temporarily if you lock yourself out of the web GUI entirely.
 
    > **Why this matters:** `pfctl -d` drops all filtering, including the rules protecting your WAN. Use it only long enough to fix the bad rule in the GUI, then re-enable with `pfctl -e` or reboot.
+
+## 10. Known Gaps After Everything Above
+
+*Time: 10 mins | These are the failure modes the rules above do not cover*
+
+1. Raise or disable Pi-hole's rate limit if you built the hairpin NAT rule in Section 6. Set `dns.rateLimit.count` well above `1000`, or set both `count` and `interval` to `0` to turn it off.
+
+   > **Why this matters:** Pi-hole rate limits **per client** at 1000 queries per 60 seconds by default and answers everything beyond that with REFUSED. Hairpin NAT collapses every redirected query onto a single source address, the firewall's LAN IP, so the whole network shares one client's budget. A busy evening trips it and DNS dies for 60 seconds at a time. Look for `Rate-limiting 192.168.90.1 for at least NN seconds` in `/var/log/pihole/FTL.log`.
+
+2. Repeat Sections 3 through 6 for every other interface you run. Every rule in this guide is scoped to `LAN` alone.
+
+   > **Why this matters:** An IoT VLAN, a guest network, or a separate WiFi interface has none of this applied. Those are exactly the segments holding the devices most likely to hardcode `8.8.8.8`, so leaving them out defeats the point. Change **Interface (rule)** and the `LAN net` source to match each interface, and remember that a rule spanning several interfaces is promoted to a floating rule.
+
+3. Accept that the redirect is IPv4 only, or build a second Destination NAT rule with **Version** set to `IPv6`.
+
+   > **Why this matters:** The NAT rule in Section 6 uses **Version** `IPv4`, so an IPv6 query to `2001:4860:4860::8888` is never translated. It still hits the Section 4 block rule and fails closed, which is safe but inconsistent. Clients that prefer IPv6 get a timeout rather than a silent redirect, and casting hardware is the usual victim.
+
+4. Verify **Quick** is checked on your pass rules if a correctly sequenced rule still loses to a later one.
+
+   > **Why this matters:** With Quick set, the first matching rule wins and the sequence numbers behave the way Section 4 describes. Without it the last match wins instead, which inverts the ordering logic entirely and makes the block rule beat a pass rule sitting above it.
+
+5. Re-run Section 8 after every OPNsense upgrade.
+
+   > **Why this matters:** The rules and NAT pages are still being reworked between releases. Field names and defaults have changed more than once, and a migrated rule can survive the upgrade with a changed meaning rather than an obvious error.
