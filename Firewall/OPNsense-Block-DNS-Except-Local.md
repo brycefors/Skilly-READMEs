@@ -14,15 +14,19 @@ This guide is resolver agnostic. Wherever it says **your resolver**, substitute 
 
 *Time: 5 mins | No changes yet, this determines which sections you follow*
 
-There are two enforcement strategies and they behave very differently.
+There are three enforcement strategies. They are not mutually exclusive, because NAT and filtering happen at different stages.
 
 1. Choose **Block** if you want rogue DNS to fail loudly. Queries to outside resolvers are dropped, the device times out, and most clients fall back to the DHCP-provided server.
 2. Choose **Redirect** (NAT) if you want rogue DNS to work but be answered by your resolver. The device thinks it is talking to `8.8.8.8` and never knows the reply came from your own server.
-3. Pick **Redirect** if you own Chromecasts, Google Home devices, or Roku hardware.
+3. Choose **Hybrid** to redirect a named list of devices and block everything else. This is the best option for most networks and the one the rest of this guide is built around.
 
-   > **Why this matters:** Google casting devices hardcode `8.8.8.8` and have no fallback. A block rule breaks casting entirely, while a redirect keeps them working and forces them through your blocklists. The tradeoff is that redirect hides the problem, so you never find out which devices are misbehaving unless you check the NAT rule's match counter.
+   > **Why this matters:** You can run both at once, and the redirect always wins where the two overlap. NAT is evaluated before the filter rules, so a matching redirect rewrites the destination and the block rule never sees a rogue address. Scope the NAT rule to a small alias of devices that need it, and the block rule keeps its teeth everywhere else. You get working Chromecasts and a firewall log that still names your misbehaving devices.
 
-4. Complete **Section 2** regardless of which path you chose. It is shared setup.
+4. Pick **Redirect** or **Hybrid** if you own Chromecasts, Google Home devices, or Roku hardware.
+
+   > **Why this matters:** Google casting devices hardcode `8.8.8.8` and have no fallback. A block rule breaks casting entirely, while a redirect keeps them working and forces them through your blocklists. Plain Redirect applied to the whole LAN hides the problem, though, because a redirected device never appears in the block log and you stop finding out which hardware is misbehaving.
+
+5. Complete **Section 2** regardless of which path you chose. It is shared setup.
 
 ## 2. Create the Approved Resolver Alias
 
@@ -44,6 +48,12 @@ There are two enforcement strategies and they behave very differently.
 11. Click **Save**, then click **Apply**.
 
     > **Why this matters:** This is the escape hatch, and it belongs in its own alias rather than as an invert on the block rule. Adding a device later is one edit in one object with no rule reordering and no risk of changing what the block rule matches. Give every host in here a static lease first, because a DHCP address that moves turns the exemption into a hole pointed at the wrong device.
+
+12. Click **+** a third time and create `DNS_Redirect` as another `Host(s)` alias if you chose Hybrid in Section 1.
+13. Add only the devices that must be silently redirected rather than blocked. Chromecasts, Google Home units, Roku boxes, and smart TVs are the usual members.
+14. Set **Description** to `Devices redirected instead of blocked`, click **Save**, then click **Apply**.
+
+    > **Why this matters:** Keeping this list small is what makes Hybrid better than a blanket redirect. Devices outside the alias still hit the block rule and still show up in the firewall log, so you keep your visibility into what is misbehaving. It also removes the loop risk covered in Section 6, because your resolver is never a member.
 
 ## 3. Allow DNS to the Approved Resolvers
 
@@ -132,11 +142,14 @@ There are two enforcement strategies and they behave very differently.
 
 > **Menu naming:** Recent OPNsense releases renamed the NAT pages. **Port Forward** is now **Destination NAT (Port Forward)** and **Outbound** is now **Source NAT (Outbound)**. Older guides use the old names for the same pages. The rule dialog is also split into tabs (**Organization**, **Interface**, **Source**, **Destination**, **Translation**, **Options**), so the fields below are grouped rather than listed on one long form.
 
-> **Order of operations:** NAT runs **before** the filter rules, not after. A query to `8.8.8.8` gets its destination rewritten to your resolver IP first, and the packet that reaches the Rules page already has the resolver as its destination. Two consequences follow from that. The pass rule from Section 3 is what permits redirected traffic, because the translated destination matches `Allowed_DNS`. The block rule from Section 4 never sees a rogue destination on this path, so it will not log the devices you redirected.
+> **Order of operations:** NAT runs **before** the filter rules, not after. A query to `8.8.8.8` gets its destination rewritten to your resolver IP first, and the packet that reaches the Rules page already has the resolver as its destination. That is why the redirect takes precedence wherever it overlaps the block rule, and why the pass rule from Section 3 is what permits redirected traffic once the translated destination matches `Allowed_DNS`. The block rule never sees a rogue destination on this path, so it will not log the devices you redirected.
 
 1. Navigate to **Firewall** > **NAT** > **Destination NAT (Port Forward)** and click **+**.
 2. On the **Interface** tab, set **Interface** to `LAN`, **Version** to `IPv4`, and **Protocol** to `TCP/UDP`.
-3. On the **Source** tab, set **Source Address** to `LAN net`.
+3. On the **Source** tab, set **Source Address** to the `DNS_Redirect` alias if you chose Hybrid, or to `LAN net` if you chose plain Redirect.
+
+   > **Why this matters:** This one field is the entire difference between the two strategies. Scoped to `DNS_Redirect`, the rule only rewrites queries from the devices you listed and everything else falls through to the block rule from Section 4 as normal. Scoped to `LAN net`, it swallows every client on the segment and the block rule goes dormant.
+
 4. On the **Destination** tab, check **Invert Destination**, then set **Destination Address** to the `Allowed_DNS` alias.
 5. Still on the **Destination** tab, set **Destination Port** to `DOMAIN (53)`.
 6. On the **Translation** tab, set **Redirect Target IP** to your **resolver IP** and **Redirect Target Port** to `DOMAIN (53)`.
@@ -150,26 +163,30 @@ There are two enforcement strategies and they behave very differently.
 
     > **Why this matters:** The inverted destination means "everything except my approved resolvers", so a query already headed to your resolver is left alone and only strays get rewritten. Without the invert the rule matches the exact opposite set, redirecting resolver-bound traffic back to the resolver as a pointless no-op while every rogue query sails past untouched.
 
-11. Check **Invert Source** on the **Source** tab and change **Source Address** from `LAN net` to the `DNS_Exempt` alias if your resolver forwards to a **public** upstream such as `1.1.1.1` or `9.9.9.9`.
+11. Skip to step 13 if you chose Hybrid, because `DNS_Redirect` already excludes your resolver.
+12. Check **Invert Source** on the **Source** tab and change **Source Address** from `LAN net` to the `DNS_Exempt` alias if you chose plain Redirect **and** your resolver forwards to a **public** upstream such as `1.1.1.1` or `9.9.9.9`.
 
-    > **Why this matters:** This is the loop. `LAN net` includes the resolver itself, so when your resolver forwards a query upstream that packet has a LAN source, a destination outside `Allowed_DNS`, and port 53. It matches this rule and gets redirected straight back to the resolver, which then queries itself. Pi-hole surfaces it as SERVFAIL or "maximum number of concurrent DNS queries reached", and every lookup on the network dies with it. Inverting the source to mean "everything except the exempt hosts" takes the resolver out of the rule. There is no cleaner option here, because the Destination NAT dialog has no equivalent of Source NAT's **Do not NAT** and a **Disabled** rule is simply not loaded rather than treated as an exclusion.
+    > **Why this matters:** This is the loop. `LAN net` includes the resolver itself, so when your resolver forwards a query upstream that packet has a LAN source, a destination outside `Allowed_DNS`, and port 53. It matches this rule and gets redirected straight back to the resolver, which then queries itself. Pi-hole surfaces it as SERVFAIL or "maximum number of concurrent DNS queries reached", and every lookup on the network dies with it. Inverting the source to mean "everything except the exempt hosts" takes the resolver out of the rule. There is no cleaner option here, because the Destination NAT dialog has no equivalent of Source NAT's **Do not NAT** and a **Disabled** rule is simply not loaded rather than treated as an exclusion. Hybrid avoids the whole problem by naming the redirected devices instead of inverting.
 
-12. Skip the invert entirely if your resolver forwards to **Unbound on OPNsense**, or if your resolver *is* Unbound on OPNsense.
+13. Skip the invert entirely if your resolver forwards to **Unbound on OPNsense**, or if your resolver *is* Unbound on OPNsense.
 
     > **Why this matters:** The firewall's LAN IP is already in `Allowed_DNS`, so the inverted destination excludes that traffic and no loop is possible. Unbound running on OPNsense is safer still, because its queries originate on the firewall and never arrive on the LAN interface where this rule lives.
 
-13. Skip to step 16 if your redirect target is the **OPNsense LAN IP** rather than a separate machine.
-14. Navigate to **Firewall** > **NAT** > **Source NAT (Outbound)**, set the mode to `Hybrid Source NAT rule generation`, click **Save**, then click **+**.
-15. Build the hairpin rule across the tabs:
+14. Skip to step 17 if your redirect target is the **OPNsense LAN IP** rather than a separate machine.
+15. Navigate to **Firewall** > **NAT** > **Source NAT (Outbound)**, set the mode to `Hybrid Source NAT rule generation`, click **Save**, then click **+**.
+
+    > **Why this matters:** This dropdown's "Hybrid" has nothing to do with the Hybrid strategy from Section 1. Here it only means "keep generating the automatic outbound rules and let me add my own on top". Leaving it on `Automatic` silently ignores the rule you are about to build.
+
+16. Build the hairpin rule across the tabs:
     - **Interface** tab: **Interface** `LAN`, **Version** `IPv4`, **Protocol** `TCP/UDP`
-    - **Source** tab: **Source Address** `LAN net`
+    - **Source** tab: **Source Address** `DNS_Redirect` for the Hybrid strategy, or `LAN net` for plain Redirect
     - **Destination** tab: **Destination Address** your **resolver IP**, **Destination Port** `DOMAIN (53)`
     - **Translation** tab: **Translate Source IP** `Interface address` (or blank)
     - **Organization** tab: **Description** `Hairpin NAT for redirected DNS`
 
-    > **Why this matters:** The client and the resolver are on the same subnet. After the redirect, the resolver sees a query from `192.168.1.50` and answers it directly, but the client is waiting for a reply from `8.8.8.8` and discards the mismatched packet. Rewriting the source to the firewall's LAN address forces the reply back through OPNsense so the address can be translated correctly. The cost is that every redirected query now appears to come from the firewall, so those lookups lose their per-client attribution in your resolver's statistics.
+    > **Why this matters:** The client and the resolver are on the same subnet. After the redirect, the resolver sees a query from `192.168.1.50` and answers it directly, but the client is waiting for a reply from `8.8.8.8` and discards the mismatched packet. Rewriting the source to the firewall's LAN address forces the reply back through OPNsense so the address can be translated correctly. The cost is that every redirected query now appears to come from the firewall, so those lookups lose their per-client attribution in your resolver's statistics. Matching the source to `DNS_Redirect` keeps that cost limited to the handful of devices you redirected.
 
-16. Click **Save**, then click **Apply**.
+17. Click **Save**, then click **Apply**.
 
 ### 6.1 When the Redirect Returns Nothing
 
