@@ -9,12 +9,15 @@
 
 ## DNS
 *   [Create Gmail Alias with Cloudflare Domain](DNS/Create-Gmail-Alias-with-Cloudflare-Domain.md) - Set up a custom email address using a Cloudflare domain and a personal Gmail account.
-*   [OPNsense-PiHole Setup Guide](DNS/PiHole-Use-OPNsense-DNS.md) - Configure Pi-hole to use OPNsense (Unbound + Dnsmasq) as it's upstream DNS server.
+*   [OPNsense-PiHole Setup Guide](DNS/PiHole-Use-OPNsense-DNS.md) - Configure Pi-hole to use OPNsense (Unbound + Dnsmasq) as its upstream DNS server.
 *   [Redirect From Cloudflare DNS Entry to Website](DNS/Redirect-From-Cloudflare-DNS-Entry-to-Website.md) - Use Cloudflare Redirect Rules to forward a domain to another URL.
 
 ## Firewall
+*   [Blocking All DNS Except Your Own Resolver](Firewall/OPNsense-Block-DNS-Except-Local.md) - Force every client onto Pi-hole, AdGuard Home, or Unbound with OPNsense rules or NAT redirection, including DoT and DoH handling.
+*   [Increasing OPNsense Throughput and Latency Performance](Firewall/OPNsense-Increase-Performance.md) - Spread packet processing across all cores, reclaim cycles lost to CPU mitigations, and keep latency flat under load.
 *   [OPNsense Unbound Watchdog with Monit](Firewall/OPNsense-Unbound-Watchdog.md) - Configure Monit to monitor and automatically restart the Unbound DNS service.
-*   [OPNsense Upgrade Best Practices Guide](Firewall/Upgrading-OPNsense.md) - Best practices for upgrading OPNsense, covering preparation, minor/major updates, and automation.
+*   [OPNsense Upgrade Best Practices Guide](Firewall/OPNsense-Upgrading.md) - Best practices for upgrading OPNsense, covering preparation, minor/major updates, and automation.
+*   [Removing Bufferbloat with FQ-CoDel](Firewall/OPNsense-Bufferbloat-Removal.md) - Shape a 1 Gbps line below its real rate so the ISP buffer never fills and latency stays low.
 
 ## Games
 *   [Optimal Setup for Ship of Harkinian](Games/OcarinaOfTime-SoH/Optimal-Setup-for-Ship-of-Harkinian.md) - Setup guide for the native PC port of *The Legend of Zelda: Ocarina of Time*.
