@@ -1,10 +1,10 @@
-## 📝 OPNsense-PiHole Setup Guide (Unbound + Dnsmasq)
+## OPNsense-PiHole Setup Guide (Unbound + Dnsmasq)
 
 By letting OPNsense handle DHCP and using its Unbound DNS as the only upstream server, Pi-hole gets the "secret sauce" needed to map local hostnames to IPs. This setup keeps Pi-hole focused strictly on ad-blocking muscle, while OPNsense manages the heavy lifting of network addressing and leases. Since the duties are split, you can swap out your DNS blocker whenever you want without breaking your entire infrastructure. It’s a clean way to get detailed dashboard reporting while keeping your network flexible and easy to manage.
 
 ---
 
-### 1. ⚙️ OPNsense Configuration
+### 1. OPNsense Configuration
 
 #### 1.1 System: General Settings
 
@@ -60,7 +60,7 @@ We configure Unbound to handle standard DNS but forward local lookups to Dnsmasq
  
 ---
  
-### 2. 🖥️ Pi-hole Configuration
+### 2. Pi-hole Configuration
  
 #### 2.1 Settings: DNS
  
@@ -75,7 +75,7 @@ We configure Unbound to handle standard DNS but forward local lookups to Dnsmasq
  
 ---
  
-### 3. ✅ Final Step
+### 3. Final Step
  
 *   **Restart Services**: It is good practice to restart both Unbound and Dnsmasq services via the OPNsense dashboard to ensure the port bindings and overrides take effect.
 *   **Renew Leases**: Reconnect your client devices to pick up the new DNS settings.
