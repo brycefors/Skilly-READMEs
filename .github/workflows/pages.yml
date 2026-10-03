@@ -27,7 +27,9 @@ jobs:
       - run: pip install mkdocs-material
 
       - name: Stage guides
-        run: rsync -a --exclude '.git*' --exclude mkdocs.yml --exclude _site_src ./ _site_src/
+        run: |
+          rsync -a --exclude '.git*' --exclude mkdocs.yml --exclude _site_src ./ _site_src/
+          sed -i '/<!-- github-only -->/,/<!-- \/github-only -->/d' _site_src/README.md
 
       - run: mkdocs build
 

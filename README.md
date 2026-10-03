@@ -1,11 +1,15 @@
 **Skilly READMEs** is a repository of random guides and documentation. It can be on how to configure a server, mom's roll recipe or how to remove foot odor.
 
+<!-- github-only -->
+For easier reading, browse these guides on the GitHub Pages site at **[brycefors.github.io/Skilly-READMEs](https://brycefors.github.io/Skilly-READMEs/)**. It adds search, a sidebar, and dark mode.
+
 ## Table of Contents
 * [DNS](#dns)
 * [Firewall](#firewall)
 * [Games](#games)
 * [Linux](#linux)
 * [Windows Troubleshooting](#windows-troubleshooting)
+<!-- /github-only -->
 
 ## DNS
 *   [Create Gmail Alias with Cloudflare Domain](DNS/Create-Gmail-Alias-with-Cloudflare-Domain.md) - Set up a custom email address using a Cloudflare domain and a personal Gmail account.
