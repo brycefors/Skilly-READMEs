@@ -10,20 +10,9 @@ docs_dir: _site_src
 theme:
   name: material
   palette:
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-      primary: indigo
-      accent: cyan
-      toggle:
-        icon: material/brightness-7
-        name: Switch to light mode
-    - media: "(prefers-color-scheme: light)"
-      scheme: default
-      primary: indigo
-      accent: cyan
-      toggle:
-        icon: material/brightness-4
-        name: Switch to dark mode
+    scheme: slate
+    primary: indigo
+    accent: cyan
   features:
     - navigation.instant
     - navigation.tracking
